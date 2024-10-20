@@ -1,0 +1,106 @@
+esphome:
+  name: bitclock-esphome
+  friendly_name: Bitclock_ESPHome
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "[CHANGEME]"
+
+ota:
+  - platform: esphome
+    password: "[CHANGEME]"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Bitclock-ESPHome Fallback Hotspot"
+    password: "[CHANGEME]"
+
+captive_portal:
+    
+# Bitclock pinout for I2C
+##define PIN_NUM_I2C_SDA GPIO_NUM_8
+##define PIN_NUM_I2C_SCL GPIO_NUM_9
+
+i2c:
+  sda: GPIO08
+  scl: GPIO09
+  scan: true
+  #id: bus_a
+
+# Exposes all three sensors
+# You can also pull temp and humidity from scd4x but I find that redundant
+# https://esphome.io/components/sensor/sht4x.html
+# https://esphome.io/components/sensor/scd4x.html
+# https://esphome.io/components/sensor/sgp4x.html
+
+sensor:
+  - platform: sht4x
+    temperature:
+      name: "Temperature"
+    humidity:
+      name: "Relative Humidity"
+  - platform: scd4x
+    co2:
+      name: "CO2"
+  - platform: sgp4x
+    voc:
+      name: "VOC Index"
+    nox:
+      name: "NOx Index"
+
+
+# None of the below configuration works yet
+# The Bitclock uses a Pervasive Displays E2271KS0C1 2.71in display
+# This display does not have a native ESPHome component or driver
+# It may be possible to adapt code from the Bitclock firmware to create the required drivers 
+
+# font:
+#   - file: "gfonts://Material+Symbols+Outlined"
+#     id: font1
+#     size: 8
+
+# Pinouts used by Bitclock rev2/rev3 for the E2271KS0C1 e-paper display
+##define PIN_NUM_SPI_MOSI GPIO_NUM_1
+##define PIN_NUM_SPI_MISO GPIO_NUM_2
+##define PIN_NUM_SPI_CLK GPIO_NUM_6
+##define PIN_NUM_SPI_CS_DISP GPIO_NUM_10
+##define PIN_NUM_DISP_BUSY GPIO_NUM_4
+##define PIN_NUM_DISP_RST GPIO_NUM_5
+##define PIN_NUM_DISP_DC GPIO_NUM_7
+
+# These are also in the firmware, but I have no idea what the last two do
+##define PIN_NUM_SPI_CS_BMV GPIO_NUM_10
+##define PIN_NUM_SPI_BMV_IRQ1 GPIO_NUM_12
+##define PIN_NUM_SPI_BMV_IRQ2 GPIO_NUM_13
+
+
+# This is how the configuration would look with a Waveshare 2.7in e-paper display
+
+#spi:
+#  clk_pin: GPIO06
+#  mosi_pin: GPIO01
+
+#display:
+#  - platform: waveshare_epaper
+#    cs_pin: GPIO10
+#    dc_pin: GPIO07
+#    busy_pin: GPIO04
+#    reset_pin: GPIO05
+#    model: 2.70inv2
+#    rotation: 270°
+#    update_interval: 10s
+#    lambda: |-
+#      it.print(0, 0, id(font1), "Hello World!");
